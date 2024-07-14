@@ -2,7 +2,7 @@ from PyQt5.QtWidgets import QMainWindow
 
 from spline_view import SplineView
 from control_panel import ControlPanel
-from about_window import Dialog
+from sub_window import Sub_window
 
 
 class MainWindow(QMainWindow):
@@ -20,7 +20,7 @@ class MainWindow(QMainWindow):
         
         help_menu = menubar.addMenu('Help')
         about_action = help_menu.addAction('About')
-        about_action.triggered.connect(Dialog)
+        about_action.triggered.connect(Sub_window.about)
 
         spline_view = SplineView()
         self.setCentralWidget(spline_view)
