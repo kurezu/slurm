@@ -2,9 +2,8 @@ from PyQt5.QtWidgets import QDialog, QLabel, QVBoxLayout
 
 
 class Sub_window(QDialog):
-
     def __init__(self):
-        super().__init__()    
+        super().__init__()  
 
     def about(self):
         self = Sub_window()

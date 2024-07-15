@@ -18,9 +18,8 @@ class MainWindow(QMainWindow):
         undo_action = edit_menu.addAction('Undo')
         redo_action = edit_menu.addAction('Redo')
         
-        help_menu = menubar.addMenu('Help')
-        about_action = help_menu.addAction('About')
-        about_action.triggered.connect(Sub_window.about)
+        about_menu = menubar.addAction('About')
+        about_menu.triggered.connect(Sub_window.about)
 
         spline_view = SplineView()
         self.setCentralWidget(spline_view)
