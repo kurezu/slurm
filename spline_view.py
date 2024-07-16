@@ -4,7 +4,7 @@ from PyQt5.QtCore import Qt, pyqtSignal
 
 from spline import Spline
 from knot import Knot
-
+from spline_history import SplineHistory
 
 class SplineView(QWidget):
     current_knot_changed = pyqtSignal(Knot)
@@ -12,7 +12,9 @@ class SplineView(QWidget):
     def __init__(self, parent = None) -> None:
         super().__init__(parent)
         self.spline = Spline()
+        self.spline_history = SplineHistory()
         self.cur_knot_index = None
+        self.spline_history.add_spline(self.spline.knots, self.cur_knot_index)
 
     def paintEvent(self, event) -> None:
         bg_color = self.palette().color(QPalette.Base)
@@ -33,16 +35,45 @@ class SplineView(QWidget):
         return super().paintEvent(event)
 
     def mousePressEvent(self, event) -> None:
+        button = event.button()
         index = self.spline.get_knot_by_pos(event.pos())
-        if index is not None:
-            self.cur_knot_index = index
-        else:
-            self.spline.add_knot(event.pos())
-            self.cur_knot_index = len(self.spline.get_knots()) - 1
+        if button == Qt.LeftButton:
+            if index is not None:
+                self.cur_knot_index = index
+            else:
+                self.spline.add_knot(event.pos())
+                self.cur_knot_index = len(self.spline.get_knots()) - 1
+            self.spline_history.add_spline(self.spline.knots, self.cur_knot_index)
             
         self.current_knot_changed.emit(self.spline.get_knots()[self.cur_knot_index])
         self.update()
         return super().mousePressEvent(event)
+
+    def undo_spline_view(self):
+        if self.spline_history.actual_index > 0:
+            self.spline_history.actual_index -= 1
+        self.spline.knots = self.spline_history.copy_spline(self.spline_history.actual_index)
+        self.cur_knot_index = self.spline_history.copy_cur_knot_ind(self.spline_history.actual_index)
+
+        if len(self.spline.knots) > 0:
+            self.current_knot_changed.emit(self.spline.knots[self.cur_knot_index])
+        self.spline.curve = None
+        self.update()
+
+    def redo_spline_view(self):
+        if self.spline_history.actual_index < len(self.spline_history.spline_list) - 1:
+            self.spline_history.actual_index += 1
+            
+            self.spline.knots = self.spline_history.copy_spline(self.spline_history.actual_index)
+            self.cur_knot_index = self.spline_history.copy_cur_knot_ind(self.spline_history.actual_index)
+
+            if len(self.spline.knots) == 0:
+                self.cur_knot_index = 0
+            else:
+                self.current_knot_changed.emit(self.spline.knots[self.cur_knot_index])
+
+            self.spline.curve = None
+            self.update()
 
     def set_current_knot(self, value: Knot):
         self.spline.set_current_knot(self.cur_knot_index, value)
