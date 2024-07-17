@@ -41,8 +41,11 @@ class SplineView(QWidget):
         if button == Qt.LeftButton:
             if index is not None:
                 self.cur_knot_index = index
+            elif (self.cur_knot_index != len(self.spline.get_knots()) - 1) and (self.cur_knot_index is not None):
+                self.spline.add_knot(event.pos(), self.cur_knot_index+1)
+                self.cur_knot_index = self.cur_knot_index + 1
             else:
-                self.spline.add_knot(event.pos())
+                self.spline.add_knot(event.pos(), None)
                 self.cur_knot_index = len(self.spline.get_knots()) - 1
             self.spline_history.add_spline(self.spline.knots, self.cur_knot_index)
             
