@@ -1,6 +1,7 @@
-from PyQt5.QtWidgets import QWidget
+from PyQt5.QtWidgets import QWidget, QFileDialog, QMessageBox
 from PyQt5.QtGui import QPainter,  QPalette, QPen, QBrush
 from PyQt5.QtCore import Qt, pyqtSignal
+import pickle
 
 from spline import Spline
 from knot import Knot
@@ -79,4 +80,32 @@ class SplineView(QWidget):
         self.spline.set_current_knot(self.cur_knot_index, value)
         self.update()
 
-    
+    def OpenDialog(self):
+
+        fname = QFileDialog.getOpenFileName(self, 'Open file', '', "Spl Files (*.spl)")[0]
+        if fname != '':
+            with open(fname, 'rb') as pickle_file:
+                self.spline.knots = pickle.load(pickle_file)
+                self.spline.curve = None
+                self.update()
+                
+    def SaveDialog(self):
+
+        fname = QFileDialog.getSaveFileName(self, 'Save file', '', "Spl Files (*.spl)")[0]
+        if fname != '':
+            with open(fname, 'wb') as pickle_file:
+                pickle.dump(self.spline.knots, pickle_file)
+                
+    def NewDialog(self):
+        dlg = QMessageBox(self)
+        dlg.setWindowTitle("New")
+        dlg.setText("Сбросить все точки?")
+        dlg.setStandardButtons(QMessageBox.Yes | QMessageBox.No)
+        dlg.setIcon(QMessageBox.Question)
+        button = dlg.exec()
+
+        if button == QMessageBox.Yes:
+            print("Yes!")
+            self.spline.knots = []
+            self.spline.curve = None
+            self.update()
