@@ -16,6 +16,12 @@ class SplineView(QWidget):
         self.spline_history = SplineHistory()
         self.cur_knot_index = None
         self.spline_history.add_spline(self.spline.knots, self.cur_knot_index)
+        self.type = 0
+
+    def set_type(self, int_n):
+        self.type = int_n
+        self.spline.curve = None
+        self.update()
 
     def paintEvent(self, event) -> None:
         bg_color = self.palette().color(QPalette.Base)
@@ -26,7 +32,7 @@ class SplineView(QWidget):
         painter.setPen(QPen(curve_color, 2, Qt.SolidLine))
         painter.setRenderHints(QPainter.HighQualityAntialiasing)
 
-        painter.drawPolyline(self.spline.get_curve())
+        painter.drawPolyline(self.spline.get_curve(self.type))
 
         painter.setBrush(QBrush(curve_color, Qt.SolidPattern))
         for index, knot in enumerate(self.spline.get_knots()):

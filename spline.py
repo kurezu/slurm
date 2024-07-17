@@ -23,9 +23,12 @@ class Spline:
         self.knots[index] = value
         self.curve = None
 
-    def get_curve(self) -> QPolygonF:
+    def get_curve(self, type) -> QPolygonF:
         if self.curve is None:
-            self._interpolate()
+            if type == 0:
+                self._interpolate()
+            if type == 1:
+                self._not_interpolate()
         return self.curve or QPolygonF()
 
     def add_knot(self, pos, index) -> None:
@@ -95,3 +98,12 @@ class Spline:
                 u += self.uStep
 
         self.curve.append(self.knots[-1].pos)
+        
+    def _not_interpolate(self) -> QPolygonF:
+        if len(self.knots) < 2:
+            return
+
+        self.curve = QPolygonF()
+
+        for i in self.knots:
+            self.curve.append(i.pos)
