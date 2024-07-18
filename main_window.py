@@ -1,5 +1,6 @@
 from PyQt5.QtWidgets import QMainWindow, QAction, QComboBox
 from PyQt5.QtGui import QKeySequence
+from PyQt5.QtCore import Qt, QEvent
 
 from spline_view import SplineView
 from control_panel import ControlPanel
@@ -14,13 +15,13 @@ class MainWindow(QMainWindow):
         self.spline_view = SplineView()
         file_menu = menubar.addMenu('File')
         new_action = file_menu.addAction('New')
-        new_action.triggered.connect(self.spline_view.NewDialog)
+        new_action.triggered.connect(self.spline_view.newDialog)
         new_action.setShortcut(QKeySequence("Ctrl+N"))
         open_action = file_menu.addAction('Open')
-        open_action.triggered.connect(self.spline_view.OpenDialog)
+        open_action.triggered.connect(self.spline_view.openDialog)
         open_action.setShortcut(QKeySequence("Ctrl+O"))
         save_action = file_menu.addAction('Save')
-        save_action.triggered.connect(self.spline_view.SaveDialog)
+        save_action.triggered.connect(self.spline_view.saveDialog)
         save_action.setShortcut(QKeySequence("Ctrl+S"))
         close_action = file_menu.addAction('Close')
         close_action.triggered.connect(self.close)
@@ -61,3 +62,10 @@ class MainWindow(QMainWindow):
             self.spline_view.set_type(1)  
         else:
             self.spline_view.set_type(0)
+            
+    def event(self, event):
+        if (event.type() == QEvent.ShortcutOverride) and (event.key() == Qt.Key_Shift):
+            self.spline_view.shift = True
+        if (event.type() == QEvent.KeyRelease) and (event.key() == Qt.Key_Shift):
+            self.spline_view.shift = False
+        return super().event(event)

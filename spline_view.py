@@ -1,6 +1,6 @@
 from PyQt5.QtWidgets import QWidget, QFileDialog, QMessageBox
 from PyQt5.QtGui import QPainter,  QPalette, QPen, QBrush
-from PyQt5.QtCore import Qt, pyqtSignal
+from PyQt5.QtCore import Qt, pyqtSignal, QEvent
 import pickle
 
 from spline import Spline
@@ -17,6 +17,7 @@ class SplineView(QWidget):
         self.cur_knot_index = None
         self.spline_history.add_spline(self.spline.knots, self.cur_knot_index)
         self.type = 0
+        self.shift = False
 
     def set_type(self, int_n):
         self.type = int_n
@@ -62,7 +63,6 @@ class SplineView(QWidget):
                 self.spline.delete_knot(index)
                 self.cur_knot_index = len(self.spline.get_knots()) - 1
             else:
-                print(index)
                 self.spline.delete_knot(index)
                 self.cur_knot_index -= 1
             self.spline_history.add_spline(self.spline.knots, self.cur_knot_index)
@@ -70,6 +70,14 @@ class SplineView(QWidget):
         self.current_knot_changed.emit(self.spline.get_knots()[self.cur_knot_index])
         self.update()
         return super().mousePressEvent(event)
+    
+    def mouseMoveEvent(self, event):
+        if self.shift == True:
+            self.spline.knots[self.cur_knot_index].pos = event.pos()
+            self.current_knot_changed.emit(self.spline.get_knots()[self.cur_knot_index])
+            self.spline.curve = None
+            self.update()
+        return super().mouseMoveEvent(event)
 
     def undo_spline_view(self):
         if self.spline_history.actual_index > 0:
@@ -101,7 +109,7 @@ class SplineView(QWidget):
         self.spline.set_current_knot(self.cur_knot_index, value)
         self.update()
 
-    def OpenDialog(self):
+    def openDialog(self):
 
         fname = QFileDialog.getOpenFileName(self, 'Open file', '', "Spl Files (*.spl)")[0]
         if fname != '':
@@ -110,14 +118,14 @@ class SplineView(QWidget):
                 self.spline.curve = None
                 self.update()
                 
-    def SaveDialog(self):
+    def saveDialog(self):
 
         fname = QFileDialog.getSaveFileName(self, 'Save file', '', "Spl Files (*.spl)")[0]
         if fname != '':
             with open(fname, 'wb') as pickle_file:
                 pickle.dump(self.spline.knots, pickle_file)
                 
-    def NewDialog(self):
+    def newDialog(self):
         dlg = QMessageBox(self)
         dlg.setWindowTitle("New")
         dlg.setText("Сбросить все точки?")
