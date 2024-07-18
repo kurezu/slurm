@@ -38,6 +38,11 @@ class Spline:
         else:
             self.knots.append(Knot(QPointF(pos)))
             self.curve = None
+            
+    def delete_knot(self, index) -> None:
+        if index is not None:
+            self.knots.pop(index)
+            self.curve = None
 
     def get_knot_by_pos(self, pos: QPoint) -> int:
         for index, knot in enumerate(self.knots):

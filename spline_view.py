@@ -54,6 +54,18 @@ class SplineView(QWidget):
                 self.spline.add_knot(event.pos(), None)
                 self.cur_knot_index = len(self.spline.get_knots()) - 1
             self.spline_history.add_spline(self.spline.knots, self.cur_knot_index)
+        
+        if button == Qt.RightButton:
+            if index is None:
+                pass
+            elif self.cur_knot_index == index:
+                self.spline.delete_knot(index)
+                self.cur_knot_index = len(self.spline.get_knots()) - 1
+            else:
+                print(index)
+                self.spline.delete_knot(index)
+                self.cur_knot_index -= 1
+            self.spline_history.add_spline(self.spline.knots, self.cur_knot_index)
             
         self.current_knot_changed.emit(self.spline.get_knots()[self.cur_knot_index])
         self.update()
@@ -114,7 +126,6 @@ class SplineView(QWidget):
         button = dlg.exec()
 
         if button == QMessageBox.Yes:
-            print("Yes!")
             self.spline.knots = []
             self.spline.curve = None
             self.update()
