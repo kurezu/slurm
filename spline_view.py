@@ -1,6 +1,6 @@
 from PyQt5.QtWidgets import QWidget, QFileDialog, QMessageBox
 from PyQt5.QtGui import QPainter,  QPalette, QPen, QBrush
-from PyQt5.QtCore import Qt, pyqtSignal, QEvent
+from PyQt5.QtCore import Qt, pyqtSignal
 import pickle
 
 from spline import Spline
@@ -110,7 +110,6 @@ class SplineView(QWidget):
         self.update()
 
     def openDialog(self):
-
         fname = QFileDialog.getOpenFileName(self, 'Open file', '', "Spl Files (*.spl)")[0]
         if fname != '':
             with open(fname, 'rb') as pickle_file:
@@ -119,7 +118,6 @@ class SplineView(QWidget):
                 self.update()
                 
     def saveDialog(self):
-
         fname = QFileDialog.getSaveFileName(self, 'Save file', '', "Spl Files (*.spl)")[0]
         if fname != '':
             with open(fname, 'wb') as pickle_file:

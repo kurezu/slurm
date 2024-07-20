@@ -1,5 +1,3 @@
-from spline import Spline
-
 from typing import List
 
 class SplineHistory():
