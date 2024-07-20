@@ -11,6 +11,7 @@ class MainWindow(QMainWindow):
     def __init__(self, parent = None):
         super().__init__(parent)
         
+        #Стиль приложения
         self.main_style = AppStyle()
         with open(self.main_style.style, 'r', encoding='utf-8') as style_sheet_file:
             self.setStyleSheet(style_sheet_file.read())
@@ -19,19 +20,26 @@ class MainWindow(QMainWindow):
         self.setWindowIcon(spline_icon)
         menubar = self.menuBar()
         self.spline_view = SplineView()
+        
+        #Меню File -> New-Open-Save-Close
         file_menu = menubar.addMenu('File')
+        
         new_action = file_menu.addAction('New')
         new_action.triggered.connect(self.spline_view.newDialog)
         new_action.setShortcut(QKeySequence("Ctrl+N"))
+        
         open_action = file_menu.addAction('Open')
         open_action.triggered.connect(self.spline_view.openDialog)
         open_action.setShortcut(QKeySequence("Ctrl+O"))
+        
         save_action = file_menu.addAction('Save')
         save_action.triggered.connect(self.spline_view.saveDialog)
         save_action.setShortcut(QKeySequence("Ctrl+S"))
+        
         close_action = file_menu.addAction('Close')
         close_action.triggered.connect(self.close)
 
+        #Меню Edit -> Undo-Redo
         edit_menu = menubar.addMenu('Edit')
         
         undo_action = QAction("Undo", self)
@@ -44,7 +52,9 @@ class MainWindow(QMainWindow):
         redo_action.setShortcut(QKeySequence("Shift+Ctrl+Z"))
         edit_menu.addAction(redo_action)
         
+        #Меню Settings -> Style-Группа из 3 стилей
         settings_menu = menubar.addMenu('Settings')
+        
         style_menu = settings_menu.addMenu("Style")
         group = QActionGroup(self)
         
@@ -70,18 +80,20 @@ class MainWindow(QMainWindow):
         group.addAction(style_action_perstfic)
         group.addAction(style_action_geoo)
         
+        #Меню About
         self.about_window = Sub_window()
         about_menu = menubar.addAction('About')
         about_menu.triggered.connect(self.about_window.about)
-
+        
+        #Основной виджет
+        self.setCentralWidget(self.spline_view)
+        
+        #Нижняя панель действий с узлами и кривой
+        control_panel = ControlPanel(self.spline_view.maximumWidth(), self.spline_view.maximumHeight())
         combo = QComboBox(self)
         combo.addItem("Kochanek–Bartels")
         combo.addItem("Polyline")
-        combo.activated.connect(self.onActivated)
-        
-        self.setCentralWidget(self.spline_view)
-        
-        control_panel = ControlPanel(self.spline_view.maximumWidth(), self.spline_view.maximumHeight())
+        combo.activated.connect(self._onActivated)
         self.statusBar().addWidget(control_panel)
         self.statusBar().addWidget(combo)
 
@@ -89,13 +101,14 @@ class MainWindow(QMainWindow):
         self.spline_view.current_knot_changed.connect(control_panel.set_state)
 
 
-    def onActivated(self, idx):
+    def _onActivated(self, idx):
         if idx == 1:
             self.spline_view.set_type(1)  
         else:
             self.spline_view.set_type(0)
             
     def event(self, event):
+        '''Функция отслеживает нажатие клавиши Shift'''
         if (event.type() == QEvent.ShortcutOverride) and (event.key() == Qt.Key_Shift):
             self.spline_view.shift = True
         if (event.type() == QEvent.KeyRelease) and (event.key() == Qt.Key_Shift):
@@ -103,16 +116,19 @@ class MainWindow(QMainWindow):
         return super().event(event)
     
     def changeStylePerstfic(self):
+        '''Метод для указания стиля Perstfic и передачи пути к файлу в style для сохранения настройки'''
         self.main_style.setStyle('style/Perstfic.qss')
         with open(self.main_style.style, 'r', encoding='utf-8') as style_sheet_file:
             self.setStyleSheet(style_sheet_file.read())
     
     def changeStyleDark(self):
+        '''Метод для указания стиля dark и передачи пути к файлу в style  для сохранения настройки'''
         self.main_style.setStyle('style/dark.qss')
         with open(self.main_style.style, 'r', encoding='utf-8') as style_sheet_file:
             self.setStyleSheet(style_sheet_file.read())
     
     def changeStyleGeoo(self):
+        '''Метод для указания стиля Geoo и передачи пути к файлу в style  для сохранения настройки'''
         self.main_style.setStyle('style/Geoo.qss')
         with open(self.main_style.style, 'r', encoding='utf-8') as style_sheet_file:
             self.setStyleSheet(style_sheet_file.read())

@@ -45,6 +45,7 @@ class SplineView(QWidget):
     def mousePressEvent(self, event) -> None:
         button = event.button()
         index = self.spline.get_knot_by_pos(event.pos())
+        
         if button == Qt.LeftButton:
             if index is not None:
                 self.cur_knot_index = index
@@ -80,6 +81,7 @@ class SplineView(QWidget):
         return super().mouseMoveEvent(event)
 
     def undo_spline_view(self):
+        '''Метод отмены последнего действия'''
         if self.spline_history.actual_index > 0:
             self.spline_history.actual_index -= 1
         self.spline.knots = self.spline_history.copy_spline(self.spline_history.actual_index)
@@ -91,6 +93,7 @@ class SplineView(QWidget):
         self.update()
 
     def redo_spline_view(self):
+        '''Метод возврата последнего действия'''
         if self.spline_history.actual_index < len(self.spline_history.spline_list) - 1:
             self.spline_history.actual_index += 1
             
@@ -110,20 +113,27 @@ class SplineView(QWidget):
         self.update()
 
     def openDialog(self):
+        '''Метод загрузки спалйна и его настроек'''
         fname = QFileDialog.getOpenFileName(self, 'Open file', '', "Spl Files (*.spl)")[0]
         if fname != '':
             with open(fname, 'rb') as pickle_file:
-                self.spline.knots = pickle.load(pickle_file)
+                self.spline.knots = pickle.load(pickle_file)[0]
+                self.spline.curve = None
+                self.update()
+            with open(fname, 'rb') as pickle_file:
+                self.type = pickle.load(pickle_file)[1]
                 self.spline.curve = None
                 self.update()
                 
     def saveDialog(self):
+        '''Метод для сохранения спалйна и его настроек'''
         fname = QFileDialog.getSaveFileName(self, 'Save file', '', "Spl Files (*.spl)")[0]
         if fname != '':
             with open(fname, 'wb') as pickle_file:
-                pickle.dump(self.spline.knots, pickle_file)
+                pickle.dump([self.spline.knots, self.type], pickle_file)
                 
     def newDialog(self):
+        '''Метод очистки рабочей области'''
         dlg = QMessageBox(self)
         dlg.setWindowTitle("New")
         dlg.setText("Сбросить все точки?")
